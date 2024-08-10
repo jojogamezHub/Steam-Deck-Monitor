@@ -7,13 +7,13 @@ import os
 
 # The country we want check for availability
 # List of possibilities here https://github.com/RudeySH/SteamCountries/blob/master/json/countries.json
-country_code = 'GB'
+country_code = 'CA'
 
 # This is the endpoint to check availability
 url = 'https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1?origin=https:%2F%2Fstore.steampowered.com&country_code='+country_code+'&packageid=' #64gb
 
 # The webhook we'll send updates to
-webhook = DiscordWebhook(url="<your discord webhook>", content="error")
+webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1271948927826133090/chv1Noy-9AUNsDkToH7xkVbyu4XSogwuFFRan03QIgH7Mc8jcnlviAGTyMeAG2BQ2Sev", content="error")
 
 def superduperscraper (version, urlSuffix) :
     oldvalue = ""
