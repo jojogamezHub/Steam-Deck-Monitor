@@ -38,11 +38,11 @@ def superduperscraper (version, urlSuffix) :
     if oldvalue != availability and oldvalue != None :
         # and if it's available send a positive message to discord
         if availability == "True" :
-            webhook.content = "refurbished "+version+"gb steam deck available"
+            webhook.content = "@Everyone refurbished "+version+"gb steam deck available"
             webhook.execute()
         # if not send a negative message
         else:
-            webhook.content = "refurbished "+version+"gb steam deck not available"
+            webhook.content = "@Everyone refurbished "+version+"gb steam deck not available"
             webhook.execute()
 
 # The numbers are the individual ids for the refurbished steam deck
