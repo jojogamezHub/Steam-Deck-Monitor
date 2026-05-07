@@ -5,7 +5,7 @@ from discord_webhook import DiscordWebhook
 
 # --- CONFIGURATION ---
 COUNTRY_CODE = 'CA'  # Canada
-WEBHOOK_URL = os.environ.get("WEBHOOK_SECRET")
+WEBHOOK_URL = os.environ.get("WEBHOOK")
 
 # Model Name -> Package ID mapping (Fixed syntax errors in strings)
 MODELS = {
