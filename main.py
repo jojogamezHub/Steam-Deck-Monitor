@@ -9,7 +9,11 @@ WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1271948927826133090/chv1Noy-9
 
 # Model Name -> Package ID mapping (Refurbished Units)
 MODELS = {
-    "256GB Deck": "539246"
+    "256GB Steam Deck": "539246",
+    "512GB Steam Deck": "595605",
+    "256GB Cert Refurbed Deck: "903906",
+    "Steam Controller: "1558609",
+    "Steam Machine: "4165910"
 }
 
 API_URL = "https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1/"
