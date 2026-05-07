@@ -20,7 +20,7 @@ jobs:
         cache: "pip"
       env:
         AGENT_TOOLSDIRECTORY: /opt/hostedtoolcache
-        MY_API_KEY: ${{ secrets.WEBHOOK_SECRET }}
+        WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
     - name: Install Dependencies
       run: |
