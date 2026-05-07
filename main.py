@@ -1,52 +1,47 @@
-# checker.py
-from time import gmtime, strftime
 import requests
-from discord_webhook import DiscordWebhook
-import time
 import os
+from time import gmtime, strftime
+from discord_webhook import DiscordWebhook
 
-# The country we want check for availability
-# List of possibilities here https://github.com/RudeySH/SteamCountries/blob/master/json/countries.json
-country_code = 'CA'
+def superduperscraper(version, package_id):
+    country_code = 'CA'
+    # Using params dict is cleaner than string concatenation
+    api_url = 'https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1/'
+    params = {
+        'origin': 'https://store.steampowered.com',
+        'country_code': country_code,
+        'packageid': package_id
+    }
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    filename = f"{version}gb.txt"
+    old_value = ""
 
-# This is the endpoint to check availability
-url = 'https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1?origin=https:%2F%2Fstore.steampowered.com&country_code='+country_code+'&packageid=' #64gb
+    if os.path.isfile(filename):
+        with open(filename, "r") as f:
+            old_value = f.read().strip()
 
-# The webhook we'll send updates to
-webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1271948927826133090/chv1Noy-9AUNsDkToH7xkVbyu4XSogwuFFRan03QIgH7Mc8jcnlviAGTyMeAG2BQ2Sev", content="error")
+    try:
+        r = requests.get(api_url, params=params, headers=headers)
+        r.raise_for_status() # This will catch 400/500 errors
+        
+        data = r.json()
+        # Navigate the JSON carefully
+        availability = str(data.get("response", {}).get("inventory_available", "False"))
+        
+        print(f"{strftime('%Y-%m-%d %H:%M:%S', gmtime())} >> {version}GB: {availability}")
 
-def superduperscraper (version, urlSuffix) :
-    oldvalue = ""
-    # previous availability is stored in a file
-    # we get the value before checking here
-    if (os.path.isfile(version + "gb.txt")):
-        file_read = open(version + "gb.txt", "r")
-        oldvalue = file_read.read()
-        file_read.close()
-    print("ov: "+ oldvalue)
+        with open(filename, "w") as f:
+            f.write(availability)
 
-    # make the request to steam to see if the steam deck is available
-    response = requests.get(url+urlSuffix)
-    # True / False depending on if it's available or not
-    availability = str(response.json()["response"]["inventory_available"])
-    print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " >> "+version+"GB Result: " + availability + " | raw: " + str(response.text))
-    # save the new availability to the same file as above
-    file = open(version + "gb.txt", "w")
-    file.write(availability)
-    file.close()
-    # if the new availability is different form the old one
-    if oldvalue != availability and oldvalue != None :
-        # and if it's available send a positive message to discord
-        if availability == "True" :
-            webhook.content = "refurbished "+version+"gb steam deck available"
+        if old_value != "" and old_value != availability:
+            status_msg = "available" if availability == "True" else "NOT available"
+            webhook = DiscordWebhook(url="YOUR_WEBHOOK_URL", 
+                                    content=f"Refurbished {version}GB Steam Deck is now {status_msg}!")
             webhook.execute()
-        # if not send a negative message
-        else:
-            webhook.content = "refurbished "+version+"gb steam deck not available"
-            webhook.execute()
 
-# The numbers are the individual ids for the refurbished steam deck
-# Got these form steamdb, you can probably add normal steam decks as well
+    except Exception as e:
+        print(f"Error checking {version}GB: {e}")
+
+# Run checks
 superduperscraper("64", "903905")
-superduperscraper("256", "903906")
-superduperscraper("512", "903907")
