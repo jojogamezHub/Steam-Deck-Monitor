@@ -9,9 +9,7 @@ WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1271948927826133090/chv1Noy-9
 
 # Model Name -> Package ID mapping (Refurbished Units)
 MODELS = {
-    "64GB Refurb": "903905",
-    "256GB Refurb": "903906",
-    "512GB Refurb": "903907"
+    "256GB Deck": "539246"
 }
 
 API_URL = "https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1/"
@@ -62,4 +60,5 @@ def check_stock():
         except Exception as e:
             print(f"Error checking {name}: {e}")
 
- check_stock()
+# --- EXECUTION ---
+check_stock()
