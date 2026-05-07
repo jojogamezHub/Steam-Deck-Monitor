@@ -2,7 +2,7 @@ name: Check For Deck Availability
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Run at 1:30 PM every day
+    - cron: '*/10 * * * *'
   workflow_dispatch:  # Trigger for manual execution
 
 jobs:
