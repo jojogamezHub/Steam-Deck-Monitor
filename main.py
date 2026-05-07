@@ -1,47 +1,65 @@
 import requests
+import time
 import os
-from time import gmtime, strftime
 from discord_webhook import DiscordWebhook
 
-def superduperscraper(version, package_id):
-    country_code = 'CA'
-    # Using params dict is cleaner than string concatenation
-    api_url = 'https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1/'
-    params = {
-        'origin': 'https://store.steampowered.com',
-        'country_code': country_code,
-        'packageid': package_id
-    }
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    
-    filename = f"{version}gb.txt"
-    old_value = ""
+# --- CONFIGURATION ---
+COUNTRY_CODE = 'CA'  # Canada
+WEBHOOK_URL = 'YOUR_NEW_WEBHOOK_URL' # Replace this!
 
-    if os.path.isfile(filename):
-        with open(filename, "r") as f:
-            old_value = f.read().strip()
+# Model Name -> Package ID mapping (Refurbished Units)
+MODELS = {
+    "64GB Refurb": "903905",
+    "256GB Refurb": "903906",
+    "512GB Refurb": "903907"
+}
 
-    try:
-        r = requests.get(api_url, params=params, headers=headers)
-        r.raise_for_status() # This will catch 400/500 errors
+API_URL = "https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1/"
+
+def check_stock():
+    for name, package_id in MODELS.items():
+        params = {
+            'origin': 'https://store.steampowered.com',
+            'country_code': COUNTRY_CODE,
+            'packageid': package_id
+        }
         
-        data = r.json()
-        # Navigate the JSON carefully
-        availability = str(data.get("response", {}).get("inventory_available", "False"))
-        
-        print(f"{strftime('%Y-%m-%d %H:%M:%S', gmtime())} >> {version}GB: {availability}")
+        # Steam API sometimes requires a basic User-Agent to avoid 400 errors
+        headers = {'User-Agent': 'Mozilla/5.0'}
 
-        with open(filename, "w") as f:
-            f.write(availability)
+        try:
+            response = requests.get(API_URL, params=params, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            # The API returns True or False
+            is_available = data.get("response", {}).get("inventory_available", False)
+            current_status = "INSTOCK" if is_available else "OUTOFSTOCK"
+            
+            # Check for changes using a local file
+            filename = f"status_{package_id}.txt"
+            old_status = ""
+            
+            if os.path.exists(filename):
+                with open(filename, "r") as f:
+                    old_status = f.read().strip()
 
-        if old_value != "" and old_value != availability:
-            status_msg = "available" if availability == "True" else "NOT available"
-            webhook = DiscordWebhook(url="YOUR_WEBHOOK_URL", 
-                                    content=f"Refurbished {version}GB Steam Deck is now {status_msg}!")
-            webhook.execute()
+            # If the status changed, send a notification
+            if current_status != old_status:
+                print(f"Update for {name}: {current_status}")
+                
+                # Update the file
+                with open(filename, "w") as f:
+                    f.write(current_status)
+                
+                # Send to Discord
+                msg = f"🚨 **Stock Update!**\nModel: {name}\nStatus: {'✅ Available' if is_available else '❌ Out of Stock'}"
+                webhook = DiscordWebhook(url=WEBHOOK_URL, content=msg)
+                webhook.execute()
+            else:
+                print(f"No change for {name} ({current_status})")
 
-    except Exception as e:
-        print(f"Error checking {version}GB: {e}")
+        except Exception as e:
+            print(f"Error checking {name}: {e}")
 
-# Run checks
-superduperscraper("64", "903905")
+ check_stock()
